@@ -1,0 +1,20 @@
+{
+	"folders": [
+		{
+			"path": "."
+		},
+		{
+			"path": "C:\\Users\\Joris\\Documents\\Arduino\\libraries\\MotorDriver"
+		},
+		{
+			"path": "C:\\Users\\Joris\\Documents\\Arduino\\libraries\\SonarHead"
+		},
+		{
+			"path": "C:\\Users\\Joris\\Documents\\Arduino\\libraries\\Sonar"
+		},
+		{
+			"path": "C:\\Users\\Joris\\Documents\\Arduino\\libraries\\Utils"
+		}
+	],
+	"settings": {}
+}
