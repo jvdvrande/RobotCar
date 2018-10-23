@@ -10,7 +10,7 @@
 #define IN3 7  //Left FWD
 #define IN4 8  //Left BWD
 
-#define SERVO_PIN 9
+#define SERVO_PIN      9
 #define SONAR_TRIG_PIN 12
 #define SONAR_ECHO_PIN 13
 
@@ -38,20 +38,21 @@ float m_distance[] = {0, 0, 0};
 float m_safe_distance = 1.f;
 float m_stop_distance = 0.5f;
 
-#define TEST_MOTOR
+// #define TEST_CYCLE
 
 // ----------------------------------------------
 void setup()
 {
+    m_motor.init();
     m_motor.set_turn_pwm(150);
     m_motor.set_drive_pwm(200);
 
-#ifdef TEST_MOTOR
-    // test motors  
-    Logger::instance().log(0, 0, "Testing Drives");
-    m_motor.test_drives(100, 500, 250);
-    Logger::instance().clear();
-#endif 
+    m_sonar_head.init();
+
+#ifdef TEST_CYCLE
+    m_sonar_head.test_servo(1000);              // test servo
+    m_motor.test_drives(100, 500, 250);         // test motors  
+#endif // TEST_CYCLE
 
     set_state(ANALYZE);
 }
@@ -63,13 +64,13 @@ void set_state(State new_state)
     
     switch(m_state)
     {
-    case ANALYZE:   Logger::instance().log(0, 0, "Analyzing");   break;
-    case TURN:      Logger::instance().log(0, 0, "Turning  ");   break;
-    case DRIVE:     Logger::instance().log(0, 0, "Driving  ");   break;
-    case REVERSE:   Logger::instance().log(0, 0, "Reversing");   break;
+    case ANALYZE:   Logger::instance().log(0, 0, "Analyzing       ");   break;
+    case TURN:      Logger::instance().log(0, 0, "Turning         ");   break;
+    case DRIVE:     Logger::instance().log(0, 0, "Driving         ");   break;
+    case REVERSE:   Logger::instance().log(0, 0, "Reversing       ");   break;
     }
 }
-
+/*
 void analyze(int delay_ms)
 {
     // turn head, store distance
@@ -108,7 +109,7 @@ void scan(Direction direction, int delay_ms)
         break;
     }
     
-    log_string += String(m_distance[direction], 2) + "cm    "; // 16
+    log_string += String(m_distance[direction], 2) + "m     "; // 16
     Logger::instance().log(0, 1, log_string);
 
     delay(delay_ms);
@@ -143,7 +144,7 @@ void drive()
 {
     float distance = m_sonar_head.scan_direction(0, 0);
     
-    String log_string("Dst: " + String(distance, 2) + "cm ");  // 12 chars
+    String log_string("Dist: " + String(distance, 2) + "m ");  // 12 chars
     
     if (distance > m_safe_distance)
     {
@@ -152,12 +153,10 @@ void drive()
     }
     else if (distance > m_stop_distance)
     {
-        //*
         float speed_factor = map(distance, m_stop_distance, m_safe_distance, 0, 100) * 0.01f;
         m_motor.forward(0.25f + (speed_factor * 0.75f));
-        /*/
-        m_motor.forward(100);
-        //*/
+
+        //m_motor.forward(100);
 
         log_string += "Slow";
     }    
@@ -181,10 +180,33 @@ void reverse(int duration)
     // re-evaluate
     set_state(ANALYZE);
 }
+*/
+
+void log_distance(uint16_t delay_ms)
+{
+    float distance = m_sonar_head.current_distance();
+    Logger::instance().log(0, 1, "Dist: " + String(distance, 3) + " m");
+    delay(delay_ms);
+}
+
+void log_sweep(uint16_t delay_ms)
+{
+    m_sonar_head.sweep(-45, 45, 3);
+    
+    String log_string;
+    for (uint8_t i = 0; i < m_sonar_head.scan_count(); ++i)
+        log_string += String(m_sonar_head.scanned_index(i), 2) + " ";
+    Logger::instance().log(0, 1, log_string);
+
+    delay(delay_ms);
+}
 
 // ----------------------------------------------
 void loop()
 {
+    log_distance(500);
+    //log_sweep(500);
+    /*
     switch(m_state)
     {
     case ANALYZE:   analyze(1000);  break;
@@ -192,4 +214,5 @@ void loop()
     case DRIVE:     drive();        break;
     case REVERSE:   reverse(2000);  break;
     }
+    */
 }
